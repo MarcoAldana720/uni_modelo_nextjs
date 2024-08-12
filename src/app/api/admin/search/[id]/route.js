@@ -1,4 +1,4 @@
-import { conn } from "@/libs/db";
+import { conn } from "../../../../../libs/db";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
@@ -6,10 +6,30 @@ export async function GET(request, { params }) {
 
     try {
       const result = await conn.query(`
-        SELECT * FROM users 
-        WHERE nombres LIKE ?  
-        OR apellidos LIKE ?
+        SELECT 
+          usuarios.us_id,
+          usuarios.us_nombres,
+          usuarios.us_apellidos,
+          generos.gen_descripcion AS gen_descripcion,
+          roles.rol_descripcion AS rol_descripcion,
+          estados.es_descripcion AS es_descripcion
+        FROM 
+          usuarios
+        JOIN 
+          generos ON usuarios.us_genero_id = generos.gen_id
+        JOIN 
+          roles ON usuarios.us_rol_id = roles.rol_id
+        JOIN 
+          estados ON usuarios.us_estado_id = estados.es_id 
+        WHERE us_nombres LIKE ?  
+        OR us_apellidos LIKE ?
+        OR generos.gen_descripcion LIKE ?
+        OR roles.rol_descripcion LIKE ?
+        OR estados.es_descripcion LIKE ?
       `, [
+        pattern,
+        pattern,
+        pattern,
         pattern,
         pattern
       ]);

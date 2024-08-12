@@ -1,98 +1,76 @@
-import { redirect } from "next/navigation";
-import axios from "axios";
-import Modal from './Modal'
+'use client'
+
+import { useRouter } from 'next/navigation';
+import Modal from './Modal';
+import { toast } from 'sonner';
+import { registerUserAction } from '../actions/registerAction';
 
 export default function NewUser({show}) {
+  const router = useRouter();
+
   async function data(formData) {
-    'use server'
     const dataObject = Object.fromEntries(formData.entries());
     const [id, ...data] = Object.values(dataObject);
     console.log(data);
+  }
 
-    // Caracteristicas Para Validar El Correo Electronico
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const dataObject = Object.fromEntries(form);
 
-    // Valida Todos Los Datos Que Se Envian Al Formulario
-    if (Object.values(data).includes("")) {
-      console.log("Complete Los Campos");
-      return;
-    }
-
-    // Valida Especificamente Los Datos Que Se Envia Al Correo Electronico
-    if (!emailRegex.test(dataObject.correo)) {
-      console.log("Correo Electronico Invalido");
-      return;
-    }
-
-    // Permite Guardar Los Datos Introducidos A La Base De Datos
     try {
-      const res = await axios.post("http://localhost:3000/api/admin", {
-        nombres: dataObject.nombres,
-        apellidos: dataObject.apellidos,
-        usuario: dataObject.usuario,
-        correo: dataObject.correo,
-        contrasena: dataObject.contrasena,
-        rol_id: dataObject.rol_id,
-        estado_id: dataObject.estado_id,
-      });
+      const res = await registerUserAction(dataObject);
+      if (res.status === 404) {
+        throw new Error(res.message);
+      }
+      toast.success(res.message);
+      router.push("/main/usuarios");
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
-
-    // Y Redirecciona A La Siguiente Ruta
-    redirect("/admin");
   }
 
   return (
-    <Modal show={show} pathRedirect="/admin/">
+    <Modal show={show} pathRedirect="/main/usuarios">
       <div className="form">
-        <div className="container_form_img">
-          <img src="/img/logo_original.png" alt="Universidad Modelo" />
-          <span>universidad modelo</span>
-        </div>
-        <form action={data}>
-          <label htmlFor="nombres">nombre(s):</label>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="us_nombres">nombre(s):</label>
           <br />
-          <input type="text" name="nombres" />
+          <input type="text" name="us_nombres" required/>
           <br />
 
-          <label htmlFor="apellidos">apellido(s):</label>
+          <label htmlFor="us_apellidos">apellido(s):</label>
           <br />
-          <input type="text" name="apellidos" />
-          <br />
-
-          <label htmlFor="usuario">usuario:</label>
-          <br />
-          <input type="text" name="usuario" />
+          <input type="text" name="us_apellidos" required/>
           <br />
 
-          <label htmlFor="correo">correo:</label>
+          <label htmlFor="us_genero_id">género:</label>
           <br />
-          <input type="email" name="correo" />
-          <br />
-
-          <label htmlFor="contrasena">contraseña:</label>
-          <br />
-          <input type="password" name="contrasena" />
-          <br />
-
-          <label htmlFor="tipo">tipo:</label>
-          <br />
-          {/* <input type="number" name="rol_id" /> */}
-          <select name="rol_id">
-            <option value="" selected>selecciona una opcion</option>
-            <option value="1">administrador</option>
-            <option value="2">cliente</option>
+          <select name="us_genero_id" required>
+            <option value="">selecciona una opcion</option>
+            <option value="1">masculino</option>
+            <option value="2">femenina</option>
           </select>
           <br />
 
-          <label htmlFor="estado">estado:</label>
+          <label htmlFor="us_usuario">usuario:</label>
           <br />
-          {/* <input type="number" name="estado_id" /> */}
-          <select name="estado_id">
-            <option value="" selected>selecciona una opcion</option>
-            <option value="1">activado</option>
-            <option value="2">desactivado</option>
+          <input type="text" name="us_usuario" required/>
+          <br />
+
+          <label htmlFor="us_correo">correo:</label>
+          <br />
+          <input type="email" name="us_correo" required/>
+          <br />
+
+          <label htmlFor="us_rol_id">cargo:</label>
+          <br />
+          <select name="us_rol_id" required>
+            <option value="">selecciona una opcion</option>
+            <option value="1">administrador</option>
+            <option value="2">visualizador</option>
+            <option value="3">usuario</option>
           </select>
           <br />
 

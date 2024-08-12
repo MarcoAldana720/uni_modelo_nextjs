@@ -1,19 +1,21 @@
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
-import "react-toastify/dist/ReactToastify.css";
-// import {NextUIProvider} from "@nextui-org/system";
+import { Toaster } from 'sonner';
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Universidad Modelo",
-  description: "Plataforma Academica De La Universidad Modelo",
+  description: "Plataforma Académica De La Universidad Modelo",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-        <body className={inter.className}>{children}</body>
+      <body className={outfit.className}>
+        <Toaster richColors closeButton={true} />
+        {children}
+      </body>
     </html>
   );
 }

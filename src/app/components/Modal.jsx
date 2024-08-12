@@ -1,17 +1,16 @@
 'use client'
+
 import { Dialog, Transition } from '@headlessui/react'
 import { useRouter } from 'next/navigation'
 import { Fragment, ReactNode } from 'react'
 
-
 export default function Modal({ children, pathRedirect ,show}) {
-
     const router = useRouter()
 
     return (
         <>
         <Transition appear show={show} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={() => router.replace(pathRedirect)}>
+            <Dialog as="div" className="dialog" onClose={() => router.replace(pathRedirect)}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -21,11 +20,11 @@ export default function Modal({ children, pathRedirect ,show}) {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 h-screen bg-black/60" />
+                    <div className="semitransparente" />
                 </Transition.Child>
 
-                <div className="fixed inset-0 overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                <div className="container_modal">
+                    <div className="modal">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -35,7 +34,7 @@ export default function Modal({ children, pathRedirect ,show}) {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-xl bg-[#FFFFFF] text-red-600 text-left align-middle shadow-xl transition-all px-10 py-5">
+                            <Dialog.Panel className="dialog_panel">
                                 {children}
                             </Dialog.Panel>
                         </Transition.Child>

@@ -1,10 +1,13 @@
 "use client"
-
+import { usePathname } from 'next/navigation'
 import Link from "next/link"
 
 function ButtonEdit({id}) {
+  const pathname = usePathname()
   return (
-    <Link href={"/admin/edit/" + id}>Editar</Link>
+    <div className="container_btn_edit">
+      <Link href={`${pathname}?edit=1`} className="btn_edit">Editar</Link>
+    </div>
   )
 }
 

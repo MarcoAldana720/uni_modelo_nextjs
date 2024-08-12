@@ -9,15 +9,15 @@ function Search() {
     
     const value = formData.get("search");
     if (!value) {
-      redirect("/admin");
+      redirect("/main/usuarios");
     } else {
-      redirect("/admin?search=" + value);
+      redirect("/main/usuarios?search=" + value);
     }
   }  
 
   return (
     <form action={search_value}>
-      <input type="text" placeholder="Buscar..." name="search" />
+      <input type="text" placeholder="buscar..." name="search" />
     </form>
   )
 }

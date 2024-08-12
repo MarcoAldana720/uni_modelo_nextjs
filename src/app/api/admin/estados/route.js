@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(request) {
     try {
-      const result = await conn.query(`SELECT * FROM roles`);
+      const result = await conn.query(`SELECT * FROM estados`);
       
       if (result.length === 0) {
         return NextResponse.json(

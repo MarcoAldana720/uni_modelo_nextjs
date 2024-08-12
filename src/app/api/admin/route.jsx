@@ -1,25 +1,32 @@
 import { NextResponse } from "next/server";
-import { conn } from "@/libs/db";
+import { conn } from "../../../libs/db";
+import bcrypt from "bcrypt";
 
+// FUNCION PARA PODER MOSTRAR TODOS LOS USUARIOS
 export async function GET() {
   try {
-    // const results = await conn.query("SELECT * FROM users");
     const results = await conn.query(`
       SELECT 
-        users.id, 
-        users.nombres, 
-        users.apellidos, 
-        users.usuario, 
-        users.correo, 
-        users.contrasena, 
-        roles.rol_description AS rol_description, 
-        status.status_description AS status_description
-      FROM 
-        users
-      JOIN 
-        roles ON users.rol_id = roles.id
-      JOIN 
-        status ON users.estado_id = status.id
+        usuarios.us_id,
+        usuarios.us_nombres,
+        usuarios.us_apellidos,
+        usuarios.us_usuario,
+        usuarios.us_correo,
+        generos.gen_descripcion,
+        roles.rol_descripcion,
+        estados.es_descripcion
+      FROM
+        usuarios
+      JOIN
+        generos ON usuarios.us_genero_id = generos.gen_id
+      JOIN
+        roles ON usuarios.us_rol_id = roles.rol_id
+      JOIN
+        estados ON usuarios.us_estado_id = estados.es_id
+      WHERE
+        roles.rol_descripcion IN ('usuario', 'visualizador')
+      ORDER BY
+        usuarios.us_nombres ASC
     `);
     
     return NextResponse.json(results);
@@ -35,27 +42,60 @@ export async function GET() {
   }
 }
 
+// FUNCION PARA PODER VALIDAR Y REGISTRAR UN NUEVO USUARIO
 export async function POST(request) {
   try {
     const data = await request.json();
+    const {
+      us_nombres,
+      us_apellidos,
+      us_usuario,
+      us_correo,
+      us_genero_id,
+      us_rol_id,
+      // us_estado_id, // Elimina esta línea ya que lo estableceremos manualmente
+    } = data;
 
-    const { nombres, apellidos, usuario, correo, contrasena, rol_id, estado_id } = data;
+    const existingUser = await conn.query("SELECT * FROM usuarios WHERE us_usuario = ? OR us_correo = ?", [us_usuario, us_correo]);
 
-    console.log(data);
+    if (existingUser.length > 0) {
+      return NextResponse.json({
+        message: "El usuario o correo electrónico ya están registrados.",
+      }, {
+        status: 400,
+      });
+    }
 
-    const result = await conn.query("INSERT INTO users SET ?", {
-      nombres, apellidos, usuario, correo, contrasena, rol_id, estado_id
+    // Definir la contraseña por defecto
+    const defaultPassword = "unimodelo";
+
+    // Hash la contraseña por defecto
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+
+    // Establecer el estado del usuario como "activado" (us_estado_id = 1)
+    const us_estado_id = 1;
+
+    const result = await conn.query("INSERT INTO usuarios SET ?", {
+      us_nombres,
+      us_apellidos,
+      us_usuario,
+      us_correo,
+      us_contrasena: hashedPassword,
+      us_genero_id,
+      us_rol_id,
+      us_estado_id, // Ahora estamos utilizando el valor manual de us_estado_id
     });
 
     return NextResponse.json({
-      nombres,
-      apellidos,
-      usuario,
-      correo,
-      contrasena,
-      rol_id,
-      estado_id,
-      id: result.insertId,
+      us_nombres,
+      us_apellidos,
+      us_usuario,
+      us_correo,
+      us_genero_id,
+      us_rol_id,
+      us_estado_id,
+      us_id: result.insertId,
     });
 
   } catch (error) {

@@ -1,4 +1,4 @@
-import { conn } from "@/libs/db";
+import { conn } from "../../../../libs/db";
 import { NextResponse } from "next/server";
 
 // FUNCION PARA OPTENER UN USUARIO
@@ -6,24 +6,27 @@ export async function GET(request, { params }) {
   try {
     const result = await conn.query(`
       SELECT 
-        users.id, 
-        users.nombres, 
-        users.apellidos, 
-        users.usuario, 
-        users.correo, 
-        users.contrasena, 
-        roles.id AS rol_id,
-        roles.rol_description AS rol_description,
-        status.id AS status_id,
-        status.status_description AS status_description
+        usuarios.us_id, 
+        usuarios.us_nombres, 
+        usuarios.us_apellidos, 
+        usuarios.us_usuario, 
+        usuarios.us_correo,
+        generos.gen_id,
+        generos.gen_descripcion,
+        roles.rol_id,
+        roles.rol_descripcion,
+        estados.es_id,
+        estados.es_descripcion
       FROM 
-        users
+        usuarios
       JOIN 
-        roles ON users.rol_id = roles.id
+        generos ON usuarios.us_genero_id = generos.gen_id
       JOIN 
-        status ON users.estado_id = status.id
+        roles ON usuarios.us_rol_id = roles.rol_id
+      JOIN 
+        estados ON usuarios.us_estado_id = estados.es_id
       WHERE 
-        users.id = ?
+        usuarios.us_id = ?
     `, [
       params.id,
     ]);
@@ -48,42 +51,11 @@ export async function GET(request, { params }) {
   }
 }
 
-// FUNCION PARA ELIMINAR UN USUARIO
-export async function DELETE(request, { params }) {
-  try {
-    const result = await conn.query("DELETE FROM users WHERE id = ?", [
-      params.id,
-    ]);
-
-    if (result.affectedRows === 0) {
-      return NextResponse.json(
-        {
-          message: "Usuario No Entontrado",
-        }, {
-          status: 404,
-        }
-      );
-    }
-
-    return new Response(null, {
-      status: 204,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        message: error.message,
-      }, {
-        status: 500,
-      }
-    );
-  }
-}
-
 // FUNCION PARA EDITAR UN USUARIO
 export async function PUT(request, { params }) {
   try {
     const data = await request.json();
-    const result = await conn.query("UPDATE users SET ? WHERE id = ?", [
+    const result = await conn.query("UPDATE usuarios SET ? WHERE us_id = ?", [
       data,
       params.id
     ]);
@@ -98,7 +70,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const updatedUser = await conn.query("SELECT * FROM users WHERE id = ?", [
+    const updatedUser = await conn.query("SELECT * FROM usuarios WHERE us_id = ?", [
       params.id,
     ]);
 

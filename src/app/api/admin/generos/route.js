@@ -1,14 +1,14 @@
-import { conn } from "@/libs/db";
+import { conn } from "../../../../libs/db";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
     try {
-      const result = await conn.query(`SELECT * FROM status`);
+      const result = await conn.query(`SELECT * FROM generos`);
       
       if (result.length === 0) {
         return NextResponse.json(
           {
-          message: "Roles No Entontrado",
+          message: "Generos No Entontrado",
           }, {
           status: 404,
           }
